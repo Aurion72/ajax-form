@@ -152,6 +152,7 @@
                 formData.append('buttonClickedValue', buttonClicked.attr('value'));
             }
 
+            let redirect_after_request = _form.attr('data-redirect-after-request');
             let loadingOverlay = _form.attr('data-loadingOverlay');
             let loadingOverlayContainer;
             if (typeof loadingOverlay !== 'undefined') {
@@ -203,6 +204,8 @@
                     el.after(html);
                 })
             });
+
+            if(redirect_after_request) window.location.href = redirect_after_request;
         };
 
         _body.on('submit', '.ajax-form', function (e) {
@@ -210,6 +213,7 @@
             e.preventDefault();
             let _form = $(this);
             let swal_confirm = _form.attr('data-swal-confirm');
+
 
             if (swal_confirm) {
                 swal({
