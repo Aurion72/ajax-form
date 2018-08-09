@@ -205,7 +205,11 @@
                 })
             });
 
-            if(redirect_after_request) window.location.href = redirect_after_request;
+            if (redirect_after_request) {
+                setTimeout(function () {
+                    window.location.href = redirect_after_request;
+                }, 400);
+            }
         };
 
         _body.on('submit', '.ajax-form', function (e) {
