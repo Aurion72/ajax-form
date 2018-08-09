@@ -1,4 +1,4 @@
-module.exports (function () {
+(function () {
     global.handleAjaxResponse = (data) => {
         console.log('aurion-ajax-form-loaded');
         let reloadDatatable = true;
