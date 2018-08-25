@@ -1,6 +1,5 @@
 (function () {
     global.handleAjaxResponse = (data) => {
-        console.log('aurion-ajax-form-loaded');
         let reloadDatatable = true;
         let delay = 0;
 
@@ -23,7 +22,6 @@
                 if (datatable_load.length) datatable_load.dataTable().api().ajax.reload();
             }
 
-
             if (typeof data.elements === 'object') {
                 $.each(data.elements, (key, value) => {
 
@@ -31,6 +29,10 @@
                         $.each(value, (attribute, v) => {
                             if (attribute === 'html') {
                                 $(key).html(v);
+                            } else if (attribute === 'methods' && typeof v === 'object') {
+                                $.each(v, (method, parameters) => {
+                                    $(key)[method](parameters);
+                                });
                             } else {
                                 if (attribute === 'value') {
                                     $(key).val(v);
@@ -83,23 +85,26 @@
                 });
             }
 
-            if (typeof data.swal === 'object' || typeof data.swal === 'boolean') {
+            if (typeof window.swal !== 'undefined') {
+                if (typeof data.swal === 'object' || typeof data.swal === 'boolean') {
 
-                let options = {};
-                if (typeof data.swal.options === 'object') {
-                    options = data.swal.options;
+                    let options = {};
+                    if (typeof data.swal.options === 'object') {
+                        options = data.swal.options;
+                    }
+
+                    options.type = typeof data.swal.type !== 'undefined' ? data.swal.type : 'success';
+                    options.title = typeof data.swal.title !== 'undefined' ? data.swal.title : 'Succès';
+                    options.text = typeof data.swal.text !== 'undefined' ? data.swal.text : 'Enregistrement effectué avec succès';
+
+                    swal(options);
                 }
-
-                options.type = typeof data.swal.type !== 'undefined' ? data.swal.type : 'success';
-                options.title = typeof data.swal.title !== 'undefined' ? data.swal.title : 'Succès';
-                options.text = typeof data.swal.text !== 'undefined' ? data.swal.text : 'Enregistrement effectué avec succès';
-
-                swal(options);
             }
 
-            initSelect2();
-            initPopover();
-            initNumeric();
+
+            if (typeof window.initSelect2 !== 'undefined') initSelect2();
+            if (typeof window.initPopover !== 'undefined') initPopover();
+            if (typeof window.initNumeric !== 'undefined') initNumeric();
 
         }, delay);
 
