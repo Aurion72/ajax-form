@@ -1,7 +1,9 @@
 (function () {
-    global.handleAjaxResponse = (data) => {
-        let reloadDatatable = true;
-        let delay = 0;
+
+    global.ajaxFormdebugMode = typeof global.ajaxFormdebugMode === 'undefined' ? false : global.ajaxFormdebugMode;
+    global.handleAjaxResponse = function (data) {
+        var reloadDatatable = true;
+        var delay = 0;
 
         if (typeof data.options === 'object') {
             if (typeof data.options.dontReloadDatatable !== 'undefined') {
@@ -18,19 +20,19 @@
 
 
             if (reloadDatatable) {
-                let datatable_load = $('.datatable-load');
+                var datatable_load = $('.datatable-load');
                 if (datatable_load.length) datatable_load.dataTable().api().ajax.reload();
             }
 
             if (typeof data.elements === 'object') {
-                $.each(data.elements, (key, value) => {
+                $.each(data.elements, function (key, value) {
 
                     if (typeof value === 'object') {
-                        $.each(value, (attribute, v) => {
+                        $.each(value, function (attribute, v) {
                             if (attribute === 'html') {
                                 $(key).html(v);
                             } else if (attribute === 'methods' && typeof v === 'object') {
-                                $.each(v, (method, parameters) => {
+                                $.each(v, function (method, parameters) {
                                     $(key)[method](parameters);
                                 });
                             } else {
@@ -49,12 +51,12 @@
             }
 
             if (typeof data.replaceElements === 'object') {
-                $.each(data.replaceElements, (key, value) => {
+                $.each(data.replaceElements, function (key, value) {
 
-                    let element = $(key);
-                    let wrapper = element.wrap('<div class="wrapper"></div>').parent();
+                    var element = $(key);
+                    var wrapper = element.wrap('<div class="wrapper"></div>').parent();
                     wrapper.html(value);
-                    let html = wrapper.html();
+                    var html = wrapper.html();
 
                     wrapper.parent().append(html);
                     wrapper.remove();
@@ -62,15 +64,15 @@
             }
 
             if (typeof data.addElements === 'object') {
-                $.each(data.addElements, (method, el_data) => {
-                    $.each(el_data, (element, content) => {
+                $.each(data.addElements, function (method, el_data) {
+                    $.each(el_data, function (element, content) {
                         $(element)[method](content);
                     });
                 });
             }
 
             if (typeof data.removeElements === 'object') {
-                $.each(data.removeElements, (index, element) => {
+                $.each(data.removeElements, function (index, element) {
                     $(element).remove();
                 });
             }
@@ -88,7 +90,7 @@
             if (typeof window.swal !== 'undefined') {
                 if (typeof data.swal === 'object' || typeof data.swal === 'boolean') {
 
-                    let options = {};
+                    var options = {};
                     if (typeof data.swal.options === 'object') {
                         options = data.swal.options;
                     }
@@ -110,142 +112,162 @@
 
     };
     global.fd = {};
-    $(document).ready(function () {
-        let buttonClicked = null;
-        let _body = $('body');
-        let sendTimeout;
-        let submitAjaxForm = (button, sendDelay) => {
-            if (typeof sendDelay === 'undefined') sendDelay = 0;
-            clearTimeout(sendTimeout);
-            sendTimeout = setTimeout(function () {
-                button.closest('.ajax-form').trigger('submit');
+
+    var buttonClicked = null;
+    var _body = $('body');
+    var sendTimeout;
+    var submitAjaxForm = function (button, sendDelay) {
+        if (typeof sendDelay === 'undefined') sendDelay = 0;
+        clearTimeout(sendTimeout);
+        sendTimeout = setTimeout(function () {
+            button.closest('.ajax-form').trigger('submit');
 
 
-            }, sendDelay);
-        };
+        }, sendDelay);
+    };
 
-        _body.on('click', '.ajax-form button', function (e) {
-            buttonClicked = $(this);
-        });
+    _body.on('click', '.ajax-form button', function (e) {
+        buttonClicked = $(this);
+    });
 
-        _body.on('change', '.send-on-change', function (e) {
-            submitAjaxForm($(this));
-        });
+    _body.on('change', '.send-on-change', function (e) {
+        submitAjaxForm($(this));
+    });
 
-        _body.on('blur', '.send-on-blur', function (e) {
-            submitAjaxForm($(this));
-        });
+    _body.on('blur', '.send-on-blur', function (e) {
+        submitAjaxForm($(this));
+    });
 
-        _body.on('keyup', '.send-on-keyup', function (e) {
-            submitAjaxForm($(this), 70);
-        });
+    _body.on('keyup', '.send-on-keyup', function (e) {
+        submitAjaxForm($(this), 70);
+    });
 
-        _body.on('keypress', '.send-on-keypress', function (e) {
-            submitAjaxForm($(this), 70);
-        });
+    _body.on('keypress', '.send-on-keypress', function (e) {
+        submitAjaxForm($(this), 70);
+    });
 
-        _body.on('keydown', '.send-on-keydown', function (e) {
-            submitAjaxForm($(this), 70);
-        });
+    _body.on('keydown', '.send-on-keydown', function (e) {
+        submitAjaxForm($(this), 70);
+    });
 
-        let ajaxFormSubmit = (_form) => {
+    var ajaxFormSubmit = function (_form) {
 
-            let formData = new FormData(_form[0]);
+        var formData = new FormData(_form[0]);
 
-            if (buttonClicked != null) {
-                formData.append('buttonClickedName', buttonClicked.attr('name'));
-                formData.append('buttonClickedValue', buttonClicked.attr('value'));
+        if (buttonClicked != null) {
+            formData.append('buttonClickedName', buttonClicked.attr('name'));
+            formData.append('buttonClickedValue', buttonClicked.attr('value'));
+        }
+
+        var redirect_after_request = _form.attr('data-redirect-after-request');
+        var loadingOverlay = _form.attr('data-loadingOverlay');
+        var loadingOverlayContainer;
+        if (typeof loadingOverlay !== 'undefined') {
+            loadingOverlayContainer = $(loadingOverlay);
+            if (!loadingOverlayContainer.length) {
+                loadingOverlayContainer = _form.parent();
             }
 
-            let redirect_after_request = _form.attr('data-redirect-after-request');
-            let loadingOverlay = _form.attr('data-loadingOverlay');
-            let loadingOverlayContainer;
-            if (typeof loadingOverlay !== 'undefined') {
-                loadingOverlayContainer = $(loadingOverlay);
-                if (!loadingOverlayContainer.length) {
-                    loadingOverlayContainer = _form.parent();
-                }
+            loadingOverlayContainer.LoadingOverlay('show');
+        }
 
-                loadingOverlayContainer.LoadingOverlay('show');
-            }
-
-            $.ajax({
-                url: _form.attr('action'),
-                data: formData,
-                cache: false,
-                contentType: false,
-                processData: false,
-                type: _form.attr('method'),
-                success: (data) => {
-                    _body.trigger('click');
-                    let empty_form = _form.attr('data-empty-form');
+        $.ajax({
+            url: _form.attr('action'),
+            data: formData,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: _form.attr('method'),
+            success: function (data) {
+                _body.trigger('click');
+                var empty_form = _form.attr('data-empty-form');
 
 
-                    if (typeof empty_form !== 'undefined') {
-                        for (let pair of formData.entries()) {
-                            $('input[name="' + pair[0] + '"]').val('');
-                            $('select[name="' + pair[0] + '"]').val('');
-                            $('textarea[name="' + pair[0] + '"]').val('');
-                        }
+                if (typeof empty_form !== 'undefined') {
+                    for (var pair of formData.entries()) {
+                        $('input[name="' + pair[0] + '"]').val('');
+                        $('select[name="' + pair[0] + '"]').val('');
+                        $('textarea[name="' + pair[0] + '"]').val('');
                     }
-                    handleAjaxResponse(data);
-
                 }
-            }).always(() => {
-                $('.invalid-feedback', _form).remove();
-                $('.is-invalid', _form).removeClass('is-invalid');
-                window.onbeforeunload = null;
-                if (typeof loadingOverlayContainer !== 'undefined') loadingOverlayContainer.LoadingOverlay('hide');
-            }).fail((data) => {
-                let errors = data.responseJSON.errors;
-                $.each(errors, function (key, value) {
-                    let el = $('[name="' + key + '"]', _form);
-                    if (!el.hasClass('is-invalid')) el.addClass('is-invalid');
-                    let html = '<div class="invalid-feedback">';
-                    $.each(value, function (i, error) {
-                        html += '<li>' + error + '</li>';
-                    });
-                    html += "</div>";
-                    el.after(html);
-                })
-            });
+                handleAjaxResponse(data);
 
-            if (redirect_after_request) {
-                setTimeout(function () {
-                    window.location.href = redirect_after_request;
-                }, 400);
             }
-        };
-
-        _body.on('submit', '.ajax-form', function (e) {
-
-            e.preventDefault();
-            let _form = $(this);
-            let swal_confirm = _form.attr('data-swal-confirm');
-
-
-            if (swal_confirm) {
-                swal({
-                    type: 'warning',
-                    title: 'Confirmation',
-                    text: 'Cette action nécessite une confirmation de votre part. Souhaitez-vous continuer ?',
-                    showConfirmButton: true,
-                    showCancelButton: true,
-                    confirmButtonText: 'Continuer',
-                    cancelButtonText: 'Annuler'
-                }).then((result) => {
-                    if (result.value) {
-                        ajaxFormSubmit(_form);
-                    }
+        }).always(function (data) {
+            $('.invalid-feedback', _form).remove();
+            $('.is-invalid', _form).removeClass('is-invalid');
+            window.onbeforeunload = null;
+            if (typeof loadingOverlayContainer !== 'undefined') loadingOverlayContainer.LoadingOverlay('hide');
+        }).fail(function (data) {
+            var errors = data.responseJSON.errors;
+            $.each(errors, function (key, value) {
+                var el = $('[name="' + key + '"]', _form);
+                if (!el.hasClass('is-invalid')) el.addClass('is-invalid');
+                var html = '<div class="invalid-feedback">';
+                $.each(value, function (i, error) {
+                    html += '<li>' + error + '</li>';
                 });
-            } else {
-                ajaxFormSubmit(_form);
-            }
-
-
+                html += "</div>";
+                el.after(html);
+            })
         });
+
+        if (redirect_after_request) {
+            setTimeout(function () {
+                window.location.href = redirect_after_request;
+            }, 400);
+        }
+    };
+
+    _body.on('submit', '.ajax-form', function (e) {
+
+        e.preventDefault();
+        var _form = $(this);
+        var swal_confirm = _form.attr('data-swal-confirm');
+
+
+        if (swal_confirm) {
+            swal({
+                type: 'warning',
+                title: 'Confirmation',
+                text: 'Cette action nécessite une confirmation de votre part. Souhaitez-vous continuer ?',
+                showConfirmButton: true,
+                showCancelButton: true,
+                confirmButtonText: 'Continuer',
+                cancelButtonText: 'Annuler'
+            }).then(function (result) {
+                if (result.value) {
+                    ajaxFormSubmit(_form);
+                }
+            });
+        } else {
+            ajaxFormSubmit(_form);
+        }
 
 
     });
-}());
 
+    if (global.ajaxFormdebugMode) {
+
+        $('.ajax-form').each(function (i, v) {
+            var _this = $(this);
+            var _form = _this.closest('form');
+            _form.css('border', '1px solid black');
+            _this.prepend('<div><input name="ajax_form_enabled_' + i + '" type="checkbox" value="1" id="ajax_form_enabled_' + i + '" class="ajax_form_enabled" checked/><label for="ajax_form_enabled_' + i + '">[DEV] Send this form using ajax</label></div>');
+        });
+
+        $('body').on('change', '.ajax_form_enabled', function () {
+            var _this = $(this);
+            var _form = _this.closest('form');
+            var checked = _this.prop('checked');
+
+            if (checked) {
+                _form.addClass('ajax-form');
+            } else {
+                _form.removeClass('ajax-form');
+            }
+        });
+    }
+
+
+}());
