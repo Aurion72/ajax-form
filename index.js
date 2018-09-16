@@ -1,8 +1,8 @@
 let $ = require('jquery');
 let swal = require('sweetalert2');
 require('gasparesganga-jquery-loading-overlay');
-
 let token = document.head.querySelector('meta[name="csrf-token"]');
+
 $.ajaxSetup({
     headers: {'X-CSRF-TOKEN': token.content}
 });
@@ -17,7 +17,7 @@ class AjaxForm {
         this.sendTimeout = setTimeout(() => {
         });
         this.options = Object.assign({
-            debugMode : false,
+            debugMode: false,
             sendTimeoutDelay: 70,
             confirmSwal: {
                 type: 'warning',
@@ -28,6 +28,7 @@ class AjaxForm {
                 confirmButtonText: 'Yes',
                 cancelButtonText: 'Cancel'
             },
+            redirectAfterRequestIsSent : false,
             loadingOverlay: $('body'),
             ajaxDoneCallback: function (data, textStatus, jqXHR) {
                 //console.log("done");
@@ -41,7 +42,7 @@ class AjaxForm {
             cleanForm: false
         }, options);
 
-        this.options = Object.assign(this.options,this._form.data());
+        this.options = Object.assign(this.options, this._form.data());
         this.debug();
     }
 
@@ -81,8 +82,8 @@ class AjaxForm {
 
         this._form.on('submit', (e) => {
 
-            let checkbox = $('input[name="ajax-form-debug-checkbox"]',this._form);
-            if(checkbox.length && !checkbox.prop('checked')){
+            let checkbox = $('input[name="ajax-form-debug-checkbox"]', this._form);
+            if (checkbox.length && !checkbox.prop('checked')) {
                 e.currentTarget.submit();
                 return false;
             }
@@ -110,8 +111,8 @@ class AjaxForm {
 
     loadingOverlay(active = true) {
         if (this.options.loadingOverlay !== null) {
-            if(this.options.loadingOverlay === 'this') this.options.loadingOverlay = this._form;
-            if(this.options.loadingOverlay === 'parent') this.options.loadingOverlay = this._form.parent();
+            if (this.options.loadingOverlay === 'this') this.options.loadingOverlay = this._form;
+            if (this.options.loadingOverlay === 'parent') this.options.loadingOverlay = this._form.parent();
             $(this.options.loadingOverlay).LoadingOverlay(active ? 'show' : 'hide');
         }
     }
@@ -129,6 +130,14 @@ class AjaxForm {
             for (let pair of this._formData.entries()) {
                 $(`[name="${pair[0]}"]:visible`, this._form).val('');
             }
+        }
+    }
+
+    redirectAfterRequestIsSent() {
+        if (this.options.redirectAfterRequestIsSent !== false) {
+            setTimeout(function () {
+                window.location.href = this.options.redirectAfterRequestIsSent;
+            }, 400);
         }
     }
 
@@ -153,6 +162,8 @@ class AjaxForm {
         }).fail((jqXHR, textStatus, errorThrown) => {
             this.options.ajaxFailCallback(this._form, jqXHR, textStatus, errorThrown);
         });
+
+        this.redirectAfterRequestIsSent();
     };
 
     static initAutoload(elementConfiguration) {
@@ -161,19 +172,19 @@ class AjaxForm {
     }
 
     static autoload() {
-        if (AjaxForm.autoloadOn.length) { 
+        if (AjaxForm.autoloadOn.length) {
             AjaxForm.autoloadOn.forEach((elementConfiguration) => {
                 $(elementConfiguration.element).each((i, v) => {
-                    if($(v).data('ajaxform')) return true;
+                    if ($(v).data('ajaxform')) return true;
                     new this($(v), elementConfiguration.options);
                 });
             });
         }
     }
 
-    debug(){
-        if(this.options.debugMode === true){
-            this._form.css('border','1px solid black');
+    debug() {
+        if (this.options.debugMode === true) {
+            this._form.css('border', '1px solid black');
             this._form.prepend('<div class="ajax-form-debug-area"><input name="ajax-form-debug-checkbox" type="checkbox" value="1" checked/><label>[AJAXFORM DEBUG] Send using ajax</label></div>');
         }
     }
