@@ -6,10 +6,10 @@ You can require this package via Npm with
 `npm install aurion72-ajaxform`
 
 # USAGE
-The most basic usage looks like this:
+AjaxForm must be attached to a form element. Once it's done, this form will be sent using Ajax. The most basic usage looks like this:
 
 ```js
-new AjaxForm(jqueryElement, options);
+new AjaxForm(formElement, options);
 ```
 
 You can also set an autoloader to convert every forms that match a specific selector.
