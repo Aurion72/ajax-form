@@ -135,7 +135,7 @@ class AjaxForm {
 
     redirectAfterRequestIsSent() {
         if (this.options.redirectAfterRequestIsSent !== false) {
-            setTimeout(function () {
+            setTimeout( () => {
                 window.location.href = this.options.redirectAfterRequestIsSent;
             }, 400);
         }
